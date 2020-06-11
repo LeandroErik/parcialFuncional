@@ -123,25 +123,25 @@ islaVecina Fuerte =[paseoBarco Fuerte ,apreciarAlgunElemento "lago" ,paseoBarco 
 islaVecina marea =[paseoBarco marea , irAlaPlaya , paseoBarco marea ]
 
 --parte a
-transformarTour::Tour->Excursion
+transformarTour::Tour -> Excursion
 transformarTour tour = foldl1 (.) tour
 
-hacerTour::Turista->Tour->Turista
-hacerTour turista tour =transformarTour tour $ (pagar turista tour) 
+hacerTour::Turista -> Tour->Turista
+hacerTour turista tour = transformarTour tour $ (pagar turista tour) 
 
-pagar::Turista->Tour ->Turista
-pagar turista tour = modificarStress (+ (length tour)) turista
+pagar::Turista -> Tour ->Turista
+pagar turista tour = modificarStress (+(length tour)) turista
 
 --parte b
 
 tourConvicente::Tour->Turista->Bool
 tourConvicente tour turista =any (condicionConvincente turista) tour
 
-condicionConvincente::Turista->Excursion->Bool
+condicionConvincente::Turista -> Excursion->Bool
 condicionConvincente turista escursion = esDesestresante turista escursion  &&  dejaAcompañado turista escursion
 
 dejaAcompañado::Turista->Excursion->Bool
-dejaAcompañado turista excursion = (not.viajaSolo) (excursion turista)
+dejaAcompañado turista excursion = (not.viajaSolo) (hacerExcursion turista excursion)
 
 --parte c
 saberEfectividad::[Turista]->Tour->Int

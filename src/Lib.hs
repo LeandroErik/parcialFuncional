@@ -23,17 +23,23 @@ data Turista = UnTurista {
 
 --Islas
 type Excursion = Turista->Turista
+
 irAlaPlaya::Excursion
 irAlaPlaya turista 
     |viajaSolo turista =modificarCansancio (+5) turista
-    |(not.viajaSolo) turista = modificarStress (+1) turista
+    |(not.viajaSolo) turista = reducirStress (1) turista
+
+apreciarAlgunElemento::String->Excursion
+apreciarAlgunElemento paisaje  = reducirStress (length paisaje) 
 
 salirConGenteQueHabla::String->Excursion
 salirConGenteQueHabla idioma turista = turista {idiomas = idioma:idiomas turista,viajaSolo = True}
 
-
 modificarStress::(Int->Int)->Turista->Turista
 modificarStress funcion turista =turista{nivelStress =(funcion .nivelStress) turista }
+
+reducirStress::Int->Turista->Turista
+reducirStress valor turista =turista{nivelStress =nivelStress turista - valor}
 
 modificarCansancio::(Int->Int)->Turista->Turista
 modificarCansancio funcion turista =turista {nivelCansancio = (funcion.nivelCansancio) turista}
@@ -45,10 +51,11 @@ nivelIntesidad::Int -> Int
 nivelIntesidad minutos = minutos `div` 4
 
 data Marea = Fuerte | Moderada | Tranquila deriving Show
+
 paseoBarco:: Marea -> Excursion
 paseoBarco Tranquila turista = (modificarStress (+6) . modificarCansancio (+10)) turista
 paseoBarco Moderada turista =turista
-paseoBarco Fuerte turista = caminar (10) . salirConGenteQueHabla ("aleman") $ turista
+paseoBarco Fuerte turista = caminar (10) .apreciarAlgunElemento "algo" .salirConGenteQueHabla ("aleman") $ turista
 
 ana = UnTurista 0 21 False ["español"]
 beto = UnTurista 15 15 True ["aleman"]
@@ -74,12 +81,44 @@ deltaExcursionSegun  indice turista excursion = deltaSegun indice (excursion tur
 --cantIdiomas = length . idiomas
 
 --esEducativa::Turista->Excursion->Bool
---esEducativa turista excursion = deltaExcursionSegun (cantIdiomas) (excursion turista) (turista)
+--esEducativa turista excursion = deltaExcursionSegun (cantIdiomas) turista excursion
 
 excursionesDesestresantes::Turista->[Excursion]->[Excursion]
 excursionesDesestresantes turista excursiones = filter (esDesestresante turista) excursiones
 
 esDesestresante::Turista->Excursion->Bool
-esDesestresante turista excursion = (deltaExcursionSegun nivelStress (excursion turista) (turista)) < 3
+esDesestresante turista excursion = (deltaExcursionSegun nivelStress turista excursion) <= 3
+--punto 3
+type Tour = [Excursion]
+completo::Tour
+completo =[caminar 20,apreciarAlgunElemento "cascada",caminar 40,salirConGenteQueHabla "malmequiano"]
+ladoB::Excursion->Tour
+ladoB escursion=[paseoBarco Tranquila,escursion,caminar 120]
+
+islaVecina::Marea->Tour
+
+islaVecina Fuerte =[paseoBarco Fuerte,apreciarAlgunElemento "lago",paseoBarco Fuerte]
+islaVecina maerea =[paseoBarco maerea,irAlaPlaya,paseoBarco maerea]
+--parte a
+transformarTour::Tour->Excursion
+transformarTour tour = foldl1 (.) tour
+
+hacerTour::Turista->Tour->Turista
+hacerTour turista tour =transformarTour tour $ (pagar turista tour) 
+
+pagar::Turista->Tour ->Turista
+pagar turista tour = modificarStress (+ (length tour)) turista
+--parte b
 
 
+
+
+
+
+--punto 4
+tourInfinito :: Excursion -> Tour
+tourInfinito excursion = excursion : tourInfinito excursion
+--parte a
+vistaPlayasInfinitas= tourInfinito irAlaPlaya
+
+--parte b

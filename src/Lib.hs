@@ -56,7 +56,7 @@ modificarCansancio::(Int->Int)->Turista->Turista
 modificarCansancio funcion turista =turista {nivelCansancio = (funcion.nivelCansancio) turista}
 
 modificarStress::(Int->Int)->Turista->Turista
-modificarStress funcion turista =turista {nivelCansancio = (funcion.nivelCansancio) turista}
+modificarStress funcion turista =turista {nivelStress = (funcion.nivelStress) turista}
 
 
 caminar :: Int->Excursion
@@ -95,7 +95,7 @@ deltaSegun f algo1 algo2 = f algo1 - f algo2
 type Indice = Turista ->Int 
 
 deltaExcursionSegun :: Indice->Turista->Excursion->Int
-deltaExcursionSegun  indice turista excursion = deltaSegun indice (excursion turista) (turista)
+deltaExcursionSegun  indice turista excursion = deltaSegun indice (hacerExcursion turista excursion) (turista)
 
 cantIdiomas ::Turista->Int
 cantIdiomas = length . idiomas
@@ -111,15 +111,17 @@ esDesestresante turista excursion = (<= 3). deltaExcursionSegun nivelStress turi
 
 --punto 3
 type Tour = [Excursion]
+
 completo::Tour
-completo =[caminar 20,apreciarAlgunElemento "cascada",caminar 40,salirConGenteQueHabla "malmequiano"]
+completo =[caminar 20,apreciarAlgunElemento "cascada" , caminar 40 ,salirConGenteQueHabla "melmacquiano"]
+
 ladoB::Excursion->Tour
-ladoB escursion=[paseoBarco Tranquila,escursion,caminar 120]
+ladoB excursionElegida=[paseoBarco Tranquila , excursionElegida , caminar 120]
 
 islaVecina::Marea->Tour
+islaVecina Fuerte =[paseoBarco Fuerte ,apreciarAlgunElemento "lago" ,paseoBarco Fuerte ]
+islaVecina marea =[paseoBarco marea , irAlaPlaya , paseoBarco marea ]
 
-islaVecina Fuerte =[paseoBarco Fuerte,apreciarAlgunElemento "lago",paseoBarco Fuerte]
-islaVecina maerea =[paseoBarco maerea,irAlaPlaya,paseoBarco maerea]
 --parte a
 transformarTour::Tour->Excursion
 transformarTour tour = foldl1 (.) tour
@@ -129,6 +131,7 @@ hacerTour turista tour =transformarTour tour $ (pagar turista tour)
 
 pagar::Turista->Tour ->Turista
 pagar turista tour = modificarStress (+ (length tour)) turista
+
 --parte b
 
 tourConvicente::Tour->Turista->Bool

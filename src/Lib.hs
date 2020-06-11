@@ -1,7 +1,8 @@
 {-
-Nombre: Apellido, Nombre
-Legajo: 999999-9
+Nombre: Quispe Choque, Erik
+Legajo: 1722876
 -}
+
 
 module Lib where
 import Text.Show.Functions

@@ -33,7 +33,7 @@ salirConGenteQueHabla idioma turista = turista {idiomas = idioma:idiomas turista
 
 
 modificarStress::(Int->Int)->Turista->Turista
-modificarStress funcion turista =turista{nivelStress = (funcion.nivelStress) turista}
+modificarStress funcion turista =turista{nivelStress =(funcion .nivelStress) turista }
 
 modificarCansancio::(Int->Int)->Turista->Turista
 modificarCansancio funcion turista =turista {nivelCansancio = (funcion.nivelCansancio) turista}
@@ -53,5 +53,33 @@ paseoBarco Fuerte turista = caminar (10) . salirConGenteQueHabla ("aleman") $ tu
 ana = UnTurista 0 21 False ["español"]
 beto = UnTurista 15 15 True ["aleman"]
 cathi = UnTurista 15 15 True ["aleman","catalan"]
+
+--punto 2
+
+obtenerPorcentaje::Int->Int->Int
+obtenerPorcentaje porcentaje valor = valor * porcentaje `div` 100
+
+hacerExcursion :: Turista ->Excursion->Turista
+hacerExcursion turista excursion = modificarStress (+(obtenerPorcentaje 10 (nivelStress turista))) . excursion $ turista
+--parte b
+deltaSegun :: (a -> Int) -> a -> a -> Int
+deltaSegun f algo1 algo2 = f algo1 - f algo2
+
+type Indice = Turista ->Int 
+
+deltaExcursionSegun :: Indice->Turista->Excursion->Int
+deltaExcursionSegun  indice turista excursion = deltaSegun indice (excursion turista) (turista)
+
+--cantIdiomas ::Turista->Int
+--cantIdiomas = length . idiomas
+
+--esEducativa::Turista->Excursion->Bool
+--esEducativa turista excursion = deltaExcursionSegun (cantIdiomas) (excursion turista) (turista)
+
+excursionesDesestresantes::Turista->[Excursion]->[Excursion]
+excursionesDesestresantes turista excursiones = filter (esDesestresante turista) excursiones
+
+esDesestresante::Turista->Excursion->Bool
+esDesestresante turista excursion = (deltaExcursionSegun nivelStress (excursion turista) (turista)) < 3
 
 

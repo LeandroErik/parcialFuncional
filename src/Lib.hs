@@ -110,9 +110,25 @@ pagar::Turista->Tour ->Turista
 pagar turista tour = modificarStress (+ (length tour)) turista
 --parte b
 
+tourConvicente::Tour->Turista->Bool
+tourConvicente tour turista =any (condicionConvincente turista) tour
+
+condicionConvincente::Turista->Excursion->Bool
+condicionConvincente turista escursion = esDesestresante turista escursion  &&  dejaAcompañado turista escursion
+
+dejaAcompañado::Turista->Excursion->Bool
+dejaAcompañado turista excursion = (not.viajaSolo) (excursion turista)
+
+--parte c
+saberEfectividad::[Turista]->Tour->Int
+saberEfectividad turistas tour = sum (map (espiritualidad tour) turistas)
 
 
+espiritualidad ::Tour->Turista->Int
+espiritualidad tour turista = sum (map (perdidas2Indices nivelStress nivelCansancio turista) tour)
 
+perdidas2Indices::Indice->Indice->Turista->Excursion->Int
+perdidas2Indices indice1 indice2 turista excursion = abs (deltaExcursionSegun indice1 turista excursion) + abs(deltaExcursionSegun indice2 turista excursion)
 
 
 --punto 4

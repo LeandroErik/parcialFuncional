@@ -14,6 +14,7 @@ Completá tus datos al inicio del archivo y hacé el primer commit & push.
 Toda la solución del parcial debe estar en este archivo.
 Recordá ir haciendo commit & push a medida que resuelvas el parcial.
 -}
+--punto 1
 data Turista = UnTurista {
     nivelCansancio :: Int,
     nivelStress :: Int,
@@ -26,8 +27,8 @@ type Excursion = Turista->Turista
 
 irAlaPlaya::Excursion
 irAlaPlaya turista 
-    |viajaSolo turista =modificarCansancio (+5) turista
-    |(not.viajaSolo) turista = reducirStress (1) turista
+    |viajaSolo turista =reducirCansancio 5 turista
+    |(not.viajaSolo) turista = reducirStress 1 turista
 
 apreciarAlgunElemento::String->Excursion
 apreciarAlgunElemento paisaje  = reducirStress (length paisaje) 
@@ -35,8 +36,18 @@ apreciarAlgunElemento paisaje  = reducirStress (length paisaje)
 salirConGenteQueHabla::String->Excursion
 salirConGenteQueHabla idioma turista = turista {idiomas = idioma:idiomas turista,viajaSolo = True}
 
+{-
+lo habia pensado con una funcion asi
 modificarStress::(Int->Int)->Turista->Turista
 modificarStress funcion turista =turista{nivelStress =(funcion .nivelStress) turista }
+lo mismo con cansansio pero a la hora de restar no me funcionaba por eso creo nuevas funciones
+esta solo funcionaba para sumar
+
+-}
+--type Indice = Turista ->Int 
+
+reducirCansancio::Int->Turista->Turista
+reducirCansancio valor turista =turista{nivelCansancio =nivelCansancio turista - valor}
 
 reducirStress::Int->Turista->Turista
 reducirStress valor turista =turista{nivelStress =nivelStress turista - valor}
@@ -44,30 +55,39 @@ reducirStress valor turista =turista{nivelStress =nivelStress turista - valor}
 modificarCansancio::(Int->Int)->Turista->Turista
 modificarCansancio funcion turista =turista {nivelCansancio = (funcion.nivelCansancio) turista}
 
+modificarStress::(Int->Int)->Turista->Turista
+modificarStress funcion turista =turista {nivelCansancio = (funcion.nivelCansancio) turista}
+
+
 caminar :: Int->Excursion
-caminar minutos turista = modificarStress (+ (nivelIntesidad minutos)) . modificarCansancio (+(nivelIntesidad minutos)) $ turista
+caminar minutos turista = reducirStress (nivelIntesidad minutos) . modificarCansancio (+(nivelIntesidad minutos)) $ turista
+
 
 nivelIntesidad::Int -> Int
 nivelIntesidad minutos = minutos `div` 4
 
+
 data Marea = Fuerte | Moderada | Tranquila deriving Show
+
 
 paseoBarco:: Marea -> Excursion
 paseoBarco Tranquila turista = (modificarStress (+6) . modificarCansancio (+10)) turista
 paseoBarco Moderada turista =turista
-paseoBarco Fuerte turista = caminar (10) .apreciarAlgunElemento "algo" .salirConGenteQueHabla ("aleman") $ turista
+paseoBarco Fuerte turista = caminar 10 .apreciarAlgunElemento "mar" . salirConGenteQueHabla ("aleman") $ turista
 
+--parte b
 ana = UnTurista 0 21 False ["español"]
 beto = UnTurista 15 15 True ["aleman"]
 cathi = UnTurista 15 15 True ["aleman","catalan"]
 
---punto 2
-
+--PARTE 2
+--parte a
 obtenerPorcentaje::Int->Int->Int
 obtenerPorcentaje porcentaje valor = valor * porcentaje `div` 100
 
 hacerExcursion :: Turista ->Excursion->Turista
-hacerExcursion turista excursion = modificarStress (+(obtenerPorcentaje 10 (nivelStress turista))) . excursion $ turista
+hacerExcursion turista excursion = reducirStress (obtenerPorcentaje 10 (nivelStress (excursion turista))) . excursion $ turista
+
 --parte b
 deltaSegun :: (a -> Int) -> a -> a -> Int
 deltaSegun f algo1 algo2 = f algo1 - f algo2
@@ -77,17 +97,18 @@ type Indice = Turista ->Int
 deltaExcursionSegun :: Indice->Turista->Excursion->Int
 deltaExcursionSegun  indice turista excursion = deltaSegun indice (excursion turista) (turista)
 
---cantIdiomas ::Turista->Int
---cantIdiomas = length . idiomas
+cantIdiomas ::Turista->Int
+cantIdiomas = length . idiomas
 
---esEducativa::Turista->Excursion->Bool
---esEducativa turista excursion = deltaExcursionSegun (cantIdiomas) turista excursion
+esEducativa::Turista->Excursion->Bool
+esEducativa turista excursion = (>0) . deltaExcursionSegun (cantIdiomas) turista $ excursion
 
 excursionesDesestresantes::Turista->[Excursion]->[Excursion]
 excursionesDesestresantes turista excursiones = filter (esDesestresante turista) excursiones
 
 esDesestresante::Turista->Excursion->Bool
-esDesestresante turista excursion = (deltaExcursionSegun nivelStress turista excursion) <= 3
+esDesestresante turista excursion = (<= 3). deltaExcursionSegun nivelStress turista $ excursion
+
 --punto 3
 type Tour = [Excursion]
 completo::Tour
@@ -138,3 +159,12 @@ tourInfinito excursion = excursion : tourInfinito excursion
 vistaPlayasInfinitas= tourInfinito irAlaPlaya
 
 --parte b
+--Se puede saber si ese tour es convincente para Ana? ¿Y con Beto? Justificar.
+--Si se puede saber porque al utlizar la funcion de que si es convicente el tour ,solo necesita que almenos uno sea desestresante ,razon por
+--la cual no importa si la lista es infinita ya que si almenos alguno cumple ,devuelve verdadero,gracias a la evaluacion diferida(lazy evaluation) que primero 
+--se fija en la funcion ,que necesita, y no tanto en los valores,en este caso el "any" utiliza evaluacion diferida
+
+--Existe algún caso donde se pueda conocer la efectividad de este tour? Justificar.
+--si existe ya que si ponemos una condicion de corte en la lista infinita dentro de la funcion,como un take o un head bastaria,
+--en cambio si no podriamos modificar la funcion interna no habria casos para saber la efectividad del tour
+
